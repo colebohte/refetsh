@@ -14,7 +14,8 @@ Refetsh relies on standard utilities:
 *   `grep`, `awk`, `cut`, `sed` (Standard coreutils)
 *   `free`, `nproc`, `lspci`, `lscpu` (Hardware info)
 *   `xdpyinfo` (For resolution detection)
-*   `gsettings` (For GNOME theme/icon detection)
+*   `gsettings` (For GNOME theme/icon detection)<br>
+<sub>Most of these come installed in most distros out of the box</sub>
 
 ## Installation
 
