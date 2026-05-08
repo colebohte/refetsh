@@ -1,0 +1,128 @@
+#!/bin/sh
+
+version="1.00"
+
+# Calculator for Refetsh System Rating
+cpu_cores=$(nproc)
+mem_total_mib=$(free -m | awk '/Mem:/ {print $2}')
+ram_gb=$(( mem_total_mib / 1024 ))
+
+# CPU Score: Base 2.0 + (Cores * 0.3)
+cpu_calc=$(( 20 + (cpu_cores * 3) ))
+# RAM Score: Base 2.0 + (GB * 0.3)
+ram_calc=$(( 20 + (ram_gb * 3) ))
+# Average
+total_calc=$(( (cpu_calc + ram_calc) / 2 ))
+
+# Cap at 150 (15.0)
+if [ "$total_calc" -gt 150 ]; then total_calc=150; fi
+
+total_score="$((total_calc / 10)).$((total_calc % 10))"
+cpu_score_fmt="$((cpu_calc / 10)).$((cpu_calc % 10))"
+ram_score_fmt="$((ram_calc / 10)).$((ram_calc % 10))"
+
+# Arg Parsing
+
+case "$1" in
+    -h|--help)
+        echo "Usage: $(basename "$0") [options]"
+        echo ""
+        echo "Options:"
+        echo "  -h, --help     ~  Show this help message"
+        echo "  -r, --ratings  ~  Show refetsh rating and explanation"
+        echo "  -v, --version  ~  Show version information"        
+        echo ""
+        echo "Refetsh; A simple system fetch script written in UNIX shell."
+        exit 0
+        ;;
+    -v|--version)
+        echo "Refetsh; Version $version"
+        exit 0
+        ;;
+    -r|--ratings)
+        echo -e "\n  Current System Ratings:"
+        echo "  ---------------------------------------"
+        echo "    CPU Score     ~  $cpu_score_fmt / 15.0"
+        echo "    RAM Score     ~  $ram_score_fmt / 15.0"
+        echo "    Total Index   ~  $total_score / 15.0"
+        echo -e "  ---------------------------------------"
+        echo ""
+        echo "  Refetsh System Rating Explanation:"
+        echo "    - CPU Score: Base 2.0 + (Cores * 0.3) - Reflects multi-threading"
+        echo "    - RAM Score: Base 2.0 + (GB * 0.3)    - Reflects memory capacity"
+        echo "    - Total Score: Average of CPU and RAM scores, capped at 15.0"
+        echo ""
+        echo "  Score Ranges:"
+        echo "    - 0.0  - 5.0  : Entry-Level Systems"
+        echo "    - 5.1  - 10.0 : Mid-Range Systems"
+        echo "    - 10.1 - 15.0 : High-End Systems"
+        echo ""
+        exit 0
+        ;;
+esac
+
+# Data collection (not like google, this is free software)
+
+distro=$(grep '^PRETTY_NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+host_model=$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null || echo "Generic PC")
+kernel=$(uname -r)
+uptime=$(uptime -p | sed 's/up //')
+pacman_pkgs=$(pacman -Qq | wc -l 2>/dev/null || echo "0")
+flatpak_pkgs=$(flatpak list --app | wc -l 2>/dev/null || echo "0")
+
+shell_info="${SHELL##*/} $BASH_VERSION"
+[ -n "$FISH_VERSION" ] && shell_info="fish $FISH_VERSION"
+resolution=$(xdpyinfo | grep dimensions | awk '{print $2}' 2>/dev/null || echo "Unknown")
+de_version="${XDG_CURRENT_DESKTOP} $(gnome-shell --version 2>/dev/null | awk '{print $3}')"
+wm_info="Mutter"
+wm_theme=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")
+icon_theme=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")
+terminal_name="${TERM_PROGRAM:-$TERM}"
+
+cpu_info=$(grep "model name" /proc/cpuinfo | head -1 | cut -d':' -f2 | sed 's/^[ \t]*//')
+cpu_freq=$(lscpu | grep "max MHz" | awk '{print $4/1000 "GHz"}' 2>/dev/null || echo "")
+gpu_info=$(lspci | grep -i vga | cut -d':' -f3 | sed 's/^[ \t]*//;s/ (rev ..)//')
+mem_stats=$(free -m | awk '/Mem:/ {print $3 "MiB / " $2 "MiB"}')
+swap_stats=$(free -m | awk '/Swap:/ {print $3 "MiB / " $2 "MiB"}')
+
+# styles
+
+c1="\e[1;34m" # Bold Blue
+c2="\e[1;37m" # Bold White
+c3="\e[1;33m" # Bold Yellow
+reset="\e[0m" 
+pad=12
+
+# OUTPUT BABY!!!!
+
+echo -e "\n  ${c2}${USER}${reset}@${c1}${HOSTNAME}${reset}"
+echo -e "  ---------------------------------------"
+
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "os"         "$distro"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "host"       "$host_model"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "kernel"     "$kernel"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "uptime"     "$uptime"
+printf "  ${c1}%${pad}s${reset} ~ %s (pacman), %s (flatpak)\n" "pkgs" "$pacman_pkgs" "$flatpak_pkgs"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "shell"      "$shell_info"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "terminal"   "$terminal_name"
+
+echo -e "  ---------------------------------------"
+
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "resolution" "$resolution"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "de"         "$de_version"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "wm"         "$wm_info"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "theme"      "$wm_theme"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "icons"      "$icon_theme"
+
+echo -e "  ---------------------------------------"
+
+printf "  ${c1}%${pad}s${reset} ~ %s (%s) @ %s\n" "cpu" "$cpu_info" "$cpu_cores" "$cpu_freq"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "gpu"        "$gpu_info"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "memory"     "$mem_stats"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "swap"       "$swap_stats"
+
+echo -e "  ---------------------------------------"
+printf "  ${c3}%${pad}s${reset} ~ %s / 15.0\n" "sys rating" "$total_score"
+printf "  ${c3}%${pad}s${reset}   %s " "" "For more details, use -r flag"
+
+echo ""
