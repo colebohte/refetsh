@@ -19,6 +19,11 @@ Refetsh relies on standard utilities:
 
 ## Installation
 
+### Package Manager
+*   *AUR*: `paru -S refetsh-git` or yay `yay -S refetsh-git`<br>
+<sub>At the moment, Refetsh is only on the AUR</sub>
+
+### Manual
 1.  **Clone or download** the script.
 2.  **Make it executable**:
     ```bash
