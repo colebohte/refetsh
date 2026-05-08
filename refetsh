@@ -67,8 +67,37 @@ distro=$(grep '^PRETTY_NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
 host_model=$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null || echo "Generic PC")
 kernel=$(uname -r)
 uptime=$(uptime -p | sed 's/up //')
-pacman_pkgs=$(pacman -Qq | wc -l 2>/dev/null || echo "0")
-flatpak_pkgs=$(flatpak list --app | wc -l 2>/dev/null || echo "0")
+pkg_count=0
+
+# Arch Linux (Pacman)
+if command -v pacman >/dev/null 2>&1; then
+    count=$(pacman -Qq | wc -l)
+    pkg_count=$((pkg_count + count))
+fi
+
+# Debian/Ubuntu (APT)
+if command -v dpkg >/dev/null 2>&1; then
+    count=$(dpkg-query -f '.\n' -W | wc -l)
+    pkg_count=$((pkg_count + count))
+fi
+
+# Fedora/RHEL (DNF/RPM)
+if command -v rpm >/dev/null 2>&1; then
+    count=$(rpm -qa | wc -l)
+    pkg_count=$((pkg_count + count))
+fi
+
+# Flatpak
+if command -v flatpak >/dev/null 2>&1; then
+    count=$(flatpak list --app | wc -l)
+    pkg_count=$((pkg_count + count))
+fi
+
+# Nix (User-specific)
+if command -v nix-env >/dev/null 2>&1; then
+    count=$(nix-env -q | wc -l)
+    pkg_count=$((pkg_count + count))
+fi
 
 shell_info="${SHELL##*/} $BASH_VERSION"
 [ -n "$FISH_VERSION" ] && shell_info="fish $FISH_VERSION"
@@ -102,7 +131,7 @@ printf "  ${c1}%${pad}s${reset} ~ %s\n" "os"         "$distro"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "host"       "$host_model"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "kernel"     "$kernel"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "uptime"     "$uptime"
-printf "  ${c1}%${pad}s${reset} ~ %s (pacman), %s (flatpak)\n" "pkgs" "$pacman_pkgs" "$flatpak_pkgs"
+printf "  ${c1}%${pad}s${reset} ~ %s\n" "pkgs" "$pkg_count"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "shell"      "$shell_info"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "terminal"   "$terminal_name"
 
