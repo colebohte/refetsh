@@ -1,6 +1,6 @@
 #!/bin/sh
 
-version="1.10"
+version="1.11"
 
 c1="\e[1;34m" # Bold Blue
 c2="\e[1;37m" # Bold White
@@ -110,7 +110,7 @@ shell_info="${SHELL##*/} $BASH_VERSION"
 [ -n "$FISH_VERSION" ] && shell_info="fish $FISH_VERSION"
 resolution=$(xdpyinfo | grep dimensions | awk '{print $2}' 2>/dev/null || echo "Unknown")
 de_version="${XDG_CURRENT_DESKTOP} $(gnome-shell --version 2>/dev/null | awk '{print $3}')"
-wm_info="Mutter"
+wm_info="$(xprop -id $(xprop -root -notype _NET_SUPPORTING_WM_CHECK | sed 's/.* //') -notype _NET_WM_NAME | sed 's/.*"\(.*\)".*/\1/')"
 wm_theme=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")
 icon_theme=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")
 terminal_name="${TERM_PROGRAM:-$TERM}"
