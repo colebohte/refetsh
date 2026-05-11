@@ -24,7 +24,5 @@ Refetsh relies on standard utilities:
 <sub>At the moment, Refetsh is only on the AUR</sub>
 
 ### Manual
-1.  **Clone or download** the script.
-2.  **Make it executable**:
-    ```bash
-    chmod +x refetsh
+1.  Clone & enter the repo; `git clone https://github.com/colebohte/refetsh.git && cd refetsh`
+2.  Run the installer script; `chmod +x install.sh && ./install.sh`
