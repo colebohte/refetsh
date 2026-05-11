@@ -1,11 +1,16 @@
 #!/bin/sh
 
-version="1.00"
+version="1.10"
 
-# Calculator for Refetsh System Rating
-cpu_cores=$(nproc)
-mem_total_mib=$(free -m | awk '/Mem:/ {print $2}')
-ram_gb=$(( mem_total_mib / 1024 ))
+c1="\e[1;34m" # Bold Blue
+c2="\e[1;37m" # Bold White
+c3="\e[1;33m" # Bold Yellow
+reset="\e[0m"
+pad=12
+
+# Calculator for Refetsh System Rating 
+cpu_cores=$(nproc) mem_total_mib=$(free -m | awk '/Mem:/ {print $2}') ram_gb=$(( mem_total_mib / 1024 )) reset="\e[0m"
+pad=12
 
 # CPU Score: Base 2.0 + (Cores * 0.3)
 cpu_calc=$(( 20 + (cpu_cores * 3) ))
@@ -36,16 +41,18 @@ case "$1" in
         exit 0
         ;;
     -v|--version)
-        echo "Refetsh; Version $version"
+        echo "${c1}Version $version${reset}"
+	echo "${c3}Refetsh${reset}; Written by ${c1}colebohte${reset}"
+	echo "Inspired by ${c2}fet.sh${reset} by ${c1}eepykate${reset}"
         exit 0
         ;;
     -r|--ratings)
-        echo -e "\n  Current System Ratings:"
+        echo "\n  Current System Ratings:"
         echo "  ---------------------------------------"
-        echo "    CPU Score     ~  $cpu_score_fmt / 15.0"
-        echo "    RAM Score     ~  $ram_score_fmt / 15.0"
-        echo "    Total Index   ~  $total_score / 15.0"
-        echo -e "  ---------------------------------------"
+        echo "    ${c1}CPU Score${reset}     ~  ${c2}$cpu_score_fmt${reset} / ${c3}15.0${reset}"
+        echo "    ${c1}RAM Score${reset}     ~  ${c2}$ram_score_fmt${reset} / ${c3}15.0${reset}"
+        echo "    ${c1}Total Index${reset}   ~  ${c2}$total_score${reset} / ${c3}15.0${reset}"
+        echo "  ---------------------------------------"
         echo ""
         echo "  Refetsh System Rating Explanation:"
         echo "    - CPU Score: Base 2.0 + (Cores * 0.3) - Reflects multi-threading"
@@ -116,16 +123,10 @@ swap_stats=$(free -m | awk '/Swap:/ {print $3 "MiB / " $2 "MiB"}')
 
 # styles
 
-c1="\e[1;34m" # Bold Blue
-c2="\e[1;37m" # Bold White
-c3="\e[1;33m" # Bold Yellow
-reset="\e[0m" 
-pad=12
-
 # OUTPUT BABY!!!!
 
-echo -e "\n  ${c2}${USER}${reset}@${c1}${HOSTNAME}${reset}"
-echo -e "  ---------------------------------------"
+echo "\n  ${c2}${USER}${reset}@${c1}$(hostname)${reset}"
+echo "  ---------------------------------------"
 
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "os"         "$distro"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "host"       "$host_model"
@@ -135,7 +136,7 @@ printf "  ${c1}%${pad}s${reset} ~ %s\n" "pkgs" "$pkg_count"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "shell"      "$shell_info"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "terminal"   "$terminal_name"
 
-echo -e "  ---------------------------------------"
+echo "  ---------------------------------------"
 
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "resolution" "$resolution"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "de"         "$de_version"
@@ -143,14 +144,15 @@ printf "  ${c1}%${pad}s${reset} ~ %s\n" "wm"         "$wm_info"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "theme"      "$wm_theme"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "icons"      "$icon_theme"
 
-echo -e "  ---------------------------------------"
+echo "  ---------------------------------------"
 
 printf "  ${c1}%${pad}s${reset} ~ %s (%s) @ %s\n" "cpu" "$cpu_info" "$cpu_cores" "$cpu_freq"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "gpu"        "$gpu_info"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "memory"     "$mem_stats"
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "swap"       "$swap_stats"
 
-echo -e "  ---------------------------------------"
+echo "  ---------------------------------------"
+
 printf "  ${c3}%${pad}s${reset} ~ %s / 15.0\n" "sys rating" "$total_score"
 printf "  ${c3}%${pad}s${reset}   %s " "" "For more details, use -r flag"
 
