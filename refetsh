@@ -1,6 +1,6 @@
 #!/bin/sh
 
-version="1.11"
+version="1.12"
 
 c1="\e[1;34m" # Bold Blue
 c2="\e[1;37m" # Bold White
@@ -125,7 +125,7 @@ swap_stats=$(free -m | awk '/Swap:/ {print $3 "MiB / " $2 "MiB"}')
 
 # OUTPUT BABY!!!!
 
-echo "\n  ${c2}${USER}${reset}@${c1}$(hostname)${reset}"
+printf "\n  ${c2}${USER}${reset}@${c1}$(hostname)${reset}"
 echo "  ---------------------------------------"
 
 printf "  ${c1}%${pad}s${reset} ~ %s\n" "os"         "$distro"
